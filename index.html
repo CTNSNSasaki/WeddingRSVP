@@ -126,82 +126,95 @@
   </form>
 
   <script>
-    const form = document.getElementById('rsvpForm');
-    const guestCountInput = document.getElementById('guestCount');
-    const guestDetailsContainer = document.getElementById('guestDetailsContainer');
-    const attendingSelect = document.getElementById('attending');
-    const conditionalFields = document.getElementById('conditionalFields');
-    const submitBtn = document.getElementById('submitBtn');
-    const confirmation = document.getElementById('confirmationMessage');
+  const form = document.getElementById('rsvpForm');
+  const guestCountInput = document.getElementById('guestCount');
+  const guestDetailsContainer = document.getElementById('guestDetailsContainer');
+  const attendingSelect = document.getElementById('attending');
+  const conditionalFields = document.getElementById('conditionalFields');
+  const submitBtn = document.getElementById('submitBtn');
+  const confirmation = document.getElementById('confirmationMessage');
 
-    // Handle show/hide fields based on Attending selection
-    attendingSelect.addEventListener('change', () => {
-      const attending = attendingSelect.value;
+  // Handle show/hide fields based on Attending selection
+  attendingSelect.addEventListener('change', () => {
+    const attending = attendingSelect.value;
 
-      if (attending === "Yes") {
-        conditionalFields.classList.remove('hidden');
-        submitBtn.classList.remove('hidden');
-      } else if (attending === "No") {
-        conditionalFields.classList.add('hidden');
-        guestDetailsContainer.innerHTML = '';
-        guestCountInput.value = '';
-        submitBtn.classList.remove('hidden'); // Show submit for "No"
-      } else {
-        conditionalFields.classList.add('hidden');
-        submitBtn.classList.add('hidden');
-      }
-    });
-
-    // Add guest detail fields based on number
-    guestCountInput.addEventListener('input', () => {
-      const count = parseInt(guestCountInput.value) || 0;
+    if (attending === "Yes") {
+      conditionalFields.classList.remove('hidden');
+      submitBtn.classList.remove('hidden');
+    } else if (attending === "No") {
+      conditionalFields.classList.add('hidden');
       guestDetailsContainer.innerHTML = '';
+      guestCountInput.value = '';
+      submitBtn.classList.remove('hidden'); // 
+    } else {
+      conditionalFields.classList.add('hidden');
+      submitBtn.classList.add('hidden');
+    }
+  });
 
-      for (let i = 1; i <= count; i++) {
-        const section = document.createElement('div');
-        section.className = 'guest-section';
-        section.innerHTML = `
-          <h4>Guest ${i}</h4>
-          <label for="guest${i}Name">Full Name</label>
-          <input type="text" name="Guest ${i} Name" id="guest${i}Name" required>
+  // Add guest detail fields based on number
+  guestCountInput.addEventListener('input', () => {
+    const count = parseInt(guestCountInput.value) || 0;
+    guestDetailsContainer.innerHTML = '';
 
-          <label for="guest${i}Meal">Meal Choice</label>
-          <select name="Guest ${i} Meal" id="guest${i}Meal" required>
-            <option value="">Select Meal</option>
-            <option value="Chicken">Chicken</option>
-            <option value="Fish">Fish</option>
-            <option value="Vegetarian">Vegetarian</option>
-          </select>
-        `;
-        guestDetailsContainer.appendChild(section);
+    for (let i = 1; i <= count; i++) {
+      const section = document.createElement('div');
+      section.className = 'guest-section';
+      section.innerHTML = `
+        <h4>Guest ${i}</h4>
+        <label for="guest${i}Name">Full Name</label>
+        <input type="text" name="Guest ${i} Name" id="guest${i}Name" required>
+
+        <label for="guest${i}Meal">Meal Choice</label>
+        <select name="Guest ${i} Meal" id="guest${i}Meal" required>
+          <option value="">Select Meal</option>
+          <option value="Chicken">Chicken</option>
+          <option value="Fish">Fish</option>
+          <option value="Vegetarian">Vegetarian</option>
+        </select>
+      `;
+      guestDetailsContainer.appendChild(section);
+    }
+  });
+
+  // Confirmation message on form submission
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    fetch(form.action, {
+      method: "POST",
+      body: formData,
+    })
+    .then(response => {
+      if (!response.ok) throw new Error("Submission failed");
+      
+      const attending = formData.get("Attending");
+      
+      // Disable all inputs and selects
+      const allFields = form.querySelectorAll("input, select, button");
+      allFields.forEach(field => field.disabled = true);
+      
+      // Reset dynamic sections
+      guestDetailsContainer.innerHTML = '';
+      conditionalFields.classList.add('hidden');
+      submitBtn.classList.add('hidden');
+      
+      // Show confirmation
+      if (attending === "Yes") {
+        confirmation.textContent = "Thanks for your RSVP! Can't wait to celebrate with you in Virginia!";
+      } else {
+        confirmation.textContent = "Thanks for your RSVP!";
       }
+      
+      confirmation.style.color = #6495ED; /* Cornflower Blue */
+      })
+    .catch(error => {
+      console.error("Submission error:", error);
+      confirmation.textContent = "Something went wrong. Please try again later.";
+      confirmation.style.color = "red";
     });
-
-    // Confirmation message on form submission
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-      fetch(form.action, {
-        method: "POST",
-        body: formData,
-      }).then(response => {
-        const attending = formData.get("Attending");
-        form.reset();
-        conditionalFields.classList.add('hidden');
-        guestDetailsContainer.innerHTML = '';
-        submitBtn.classList.add('hidden');
-
-        if (attending === "Yes") {
-          confirmation.textContent = "Thanks for your RSVP! Can't wait to celebrate with you in Virginia!";
-        } else {
-          confirmation.textContent = "Thanks for your RSVP!";
-        }
-      }).catch(error => {
-        confirmation.textContent = "Something went wrong. Please try again later.";
-        confirmation.style.color = "red";
-      });
-    });
+  });
   </script>
 </body>
 </html>
