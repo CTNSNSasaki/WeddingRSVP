@@ -1,27 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wedding RSVP</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; }
-    form { max-width: 400px; margin: auto; }
-    input, select { width: 100%; padding: 10px; margin: 10px 0; }
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+      text-align: center;
+    }
+    form {
+      background: #fff;
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      font-size: 1em;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      background: #007BFF;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .guest-section {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #f1f1f1;
+    }
   </style>
 </head>
 <body>
-  <h1>RSVP for Our Wedding</h1>
+  <h1>Wedding RSVP</h1>
   <form action="https://formspree.io/f/yourformid" method="POST">
-    <input type="text" name="Name" placeholder="Your Name" required>
-    <select name="Meal">
-      <option value="">Select your meal</option>
-      <option value="Chicken">Chicken</option>
-      <option value="Fish">Fish</option>
-      <option value="Vegetarian">Vegetarian</option>
+    
+    <!-- Main Guest Name -->
+    <label for="name">Your Full Name</label>
+    <input type="text" name="Guest Name" id="name" required />
+
+    <!-- Attending -->
+    <label for="attending">Will you be attending?</label>
+    <select name="Attending" id="attending" required>
+      <option value="">Select</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
     </select>
-    <input type="email" name="Email" placeholder="Your Email (for confirmation)" required>
+
+    <!-- Additional Guests -->
+    <label for="guestCount">Number of Guests</label>
+    <input type="number" id="guestCount" min="0" max="20" />
+
+    <!-- Placeholder for dynamic guest details -->
+    <div id="guestDetailsContainer"></div>
+
+    <!-- Email -->
+    <label for="email">Your Email (to confirm RSVP)</label>
+    <input type="email" name="Email" id="email" required />
+
     <button type="submit">Submit RSVP</button>
   </form>
+
+  <script>
+    const guestCountInput = document.getElementById('guestCount');
+    const container = document.getElementById('guestDetailsContainer');
+
+    guestCountInput.addEventListener('input', () => {
+      const count = parseInt(guestCountInput.value) || 0;
+      container.innerHTML = ''; // Clear previous guest fields
+
+      for (let i = 1; i <= count; i++) {
+        const section = document.createElement('div');
+        section.className = 'guest-section';
+        section.innerHTML = `
+          <h4>Guest ${i}</h4>
+          <label for="guest${i}Name">Full Name</label>
+          <input type="text" name="Guest ${i} Name" id="guest${i}Name" required>
+
+          <label for="guest${i}Meal">Meal Choice</label>
+          <select name="Guest ${i} Meal" id="guest${i}Meal" required>
+            <option value="">Select Meal</option>
+            <option value="Chicken">Chicken</option>
+            <option value="Fish">Fish</option>
+            <option value="Vegetarian">Vegetarian</option>
+          </select>
+        `;
+        container.appendChild(section);
+      }
+    });
+  </script>
 </body>
 </html>
