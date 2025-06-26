@@ -9,40 +9,39 @@
       font-family: sans-serif;
       background: #f9f9f9;
       padding: 20px;
-      text-align: center;
+      display: flex;
+      justify-content: center;
     }
+
     form {
       background: #fff;
+      width: 100%;
       max-width: 700px;
-      margin: auto;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      text-align: left;
     }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 20px;
-      font-size: 1em;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1em;
-      border: none;
-      background: #007BFF;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
+
     h1 {
       text-align: center;
       margin-bottom: 30px;
     }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 20px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+
     .guest-section {
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -50,14 +49,38 @@
       margin-bottom: 10px;
       background-color: #f1f1f1;
     }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      background: #6495ED; /* Cornflower Blue */
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #4178d4;
+    }
+
+    #confirmationMessage {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: green;
+    }
   </style>
 </head>
 <body>
-  <h1>Wedding RSVP</h1>
-  <form action="https://script.google.com/macros/s/AKfycbyJGSfYIe9hgh0K2AsTUKvgNLNcEg3TRcigZWN4jDk8Totoe0bJHmkKLPIiatHJIlRz0Q/exec" method="POST">
-    
-    <!-- Main Guest Name -->
-    <label for="name">Your Full Name</label>
+  <form id="rsvpForm" action="https://script.google.com/macros/s/AKfycbyJGSfYIe9hgh0K2AsTUKvgNLNcEg3TRcigZWN4jDk8Totoe0bJHmkKLPIiatHJIlRz0Q/exec" method="POST">
+    <h1>Wedding RSVP</h1>
+
+    <!-- Name -->
+    <label for="name">Name</label>
     <input type="text" name="Guest Name" id="name" required />
 
     <!-- Attending -->
@@ -68,27 +91,58 @@
       <option value="No">No</option>
     </select>
 
-    <!-- Additional Guests -->
-    <label for="guestCount">Number of Guests</label>
-    <input type="number" id="guestCount" min="0" max="20" />
+    <!-- Number of Guests -->
+    <div id="guestCountWrapper" style="display:none;">
+      <label for="guestCount">Number of Guest(s)</label>
+      <input type="number" name="Number of Guest" id="guestCount" min="0" max="10" />
+    </div>
 
-    <!-- Placeholder for dynamic guest details -->
+    <!-- Dynamic Guest Details -->
     <div id="guestDetailsContainer"></div>
 
     <!-- Phone Number -->
-    <label for="phone number">Your Phone Number (to confirm RSVP)</label>
-    <input type="phone number" name="phone number" id="phone number" required />
+    <label for="phone">Your Phone Number</label>
+    <input
+      type="tel"
+      name="Phone"
+      id="phone"
+      placeholder="(012) 345-6789"
+      pattern="\(\d{3}\) \d{3}-\d{4}"
+      title="Please use format: (012) 345-6789"
+      required
+    />
 
+
+    <!-- Submit -->
     <button type="submit">Submit RSVP</button>
+
+    <div id="confirmationMessage"></div>
   </form>
 
   <script>
+    const form = document.getElementById('rsvpForm');
     const guestCountInput = document.getElementById('guestCount');
-    const container = document.getElementById('guestDetailsContainer');
+    const guestDetailsContainer = document.getElementById('guestDetailsContainer');
+    const attendingSelect = document.getElementById('attending');
+    const guestCountWrapper = document.getElementById('guestCountWrapper');
+    const confirmation = document.getElementById('confirmationMessage');
 
+    // Show/hide guest details based on attending
+    attendingSelect.addEventListener('change', () => {
+      const attending = attendingSelect.value;
+      if (attending === "Yes") {
+        guestCountWrapper.style.display = 'block';
+      } else {
+        guestCountWrapper.style.display = 'none';
+        guestCountInput.value = '';
+        guestDetailsContainer.innerHTML = '';
+      }
+    });
+
+    // Add dynamic guest fields
     guestCountInput.addEventListener('input', () => {
       const count = parseInt(guestCountInput.value) || 0;
-      container.innerHTML = ''; // Clear previous guest fields
+      guestDetailsContainer.innerHTML = '';
 
       for (let i = 1; i <= count; i++) {
         const section = document.createElement('div');
@@ -106,8 +160,33 @@
             <option value="Vegetarian">Vegetarian</option>
           </select>
         `;
-        container.appendChild(section);
+        guestDetailsContainer.appendChild(section);
       }
+    });
+
+    // Confirmation message after submission
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      fetch(form.action, {
+        method: "POST",
+        body: formData,
+      }).then(response => {
+        const attending = formData.get("Attending");
+        form.reset();
+        guestCountWrapper.style.display = 'none';
+        guestDetailsContainer.innerHTML = '';
+
+        if (attending === "Yes") {
+          confirmation.textContent = "Thanks for your RSVP! Can't wait to celebrate with you in Virginia!";
+        } else {
+          confirmation.textContent = "Thanks for your RSVP!";
+        }
+      }).catch(error => {
+        confirmation.textContent = "Something went wrong. Please try again later.";
+        confirmation.style.color = "red";
+      });
     });
   </script>
 </body>
