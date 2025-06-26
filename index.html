@@ -73,6 +73,10 @@
       font-weight: bold;
       color: green;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -91,30 +95,37 @@
       <option value="No">No</option>
     </select>
 
-    <!-- Number of Guests -->
-    <div id="guestCountWrapper" style="display:none;">
-      <label for="guestCount">Number of Guest(s)</label>
-      <input type="number" name="Number of Guest" id="guestCount" min="0" max="10" />
+    <!-- Conditional Fields -->
+    <div id="conditionalFields" class="hidden">
+
+      <!-- Number of Guest(s) -->
+      <div id="guestCountWrapper">
+        <label for="guestCount">Number of Guest(s)</label>
+        <input type="number" name="Number of Guest(s)" id="guestCount" min="0" max="10" />
+      </div>
+
+      <!-- Dynamic Guest Details -->
+      <div id="guestDetailsContainer"></div>
+
+      <!-- Phone Number -->
+      <label for="phone">Your Phone Number</label>
+      <input
+        type="tel"
+        name="Phone"
+        id="phone"
+        placeholder="(012) 345-6789"
+        pattern="\(\d{3}\) \d{3}-\d{4}"
+        title="Please use format: (012) 345-6789"
+        required
+      />
+
+      <!-- Email -->
+      <label for="email">Your Email (to confirm RSVP)</label>
+      <input type="email" name="Email" id="email" required />
     </div>
 
-    <!-- Dynamic Guest Details -->
-    <div id="guestDetailsContainer"></div>
-
-    <!-- Phone Number -->
-    <label for="phone">Your Phone Number</label>
-    <input
-      type="tel"
-      name="Phone"
-      id="phone"
-      placeholder="(012) 345-6789"
-      pattern="\(\d{3}\) \d{3}-\d{4}"
-      title="Please use format: (012) 345-6789"
-      required
-    />
-
-
     <!-- Submit -->
-    <button type="submit">Submit RSVP</button>
+    <button type="submit" id="submitBtn" class="hidden">Submit RSVP</button>
 
     <div id="confirmationMessage"></div>
   </form>
@@ -124,22 +135,29 @@
     const guestCountInput = document.getElementById('guestCount');
     const guestDetailsContainer = document.getElementById('guestDetailsContainer');
     const attendingSelect = document.getElementById('attending');
-    const guestCountWrapper = document.getElementById('guestCountWrapper');
+    const conditionalFields = document.getElementById('conditionalFields');
+    const submitBtn = document.getElementById('submitBtn');
     const confirmation = document.getElementById('confirmationMessage');
 
-    // Show/hide guest details based on attending
+    // Handle show/hide fields based on Attending selection
     attendingSelect.addEventListener('change', () => {
       const attending = attendingSelect.value;
+
       if (attending === "Yes") {
-        guestCountWrapper.style.display = 'block';
-      } else {
-        guestCountWrapper.style.display = 'none';
-        guestCountInput.value = '';
+        conditionalFields.classList.remove('hidden');
+        submitBtn.classList.remove('hidden');
+      } else if (attending === "No") {
+        conditionalFields.classList.add('hidden');
         guestDetailsContainer.innerHTML = '';
+        guestCountInput.value = '';
+        submitBtn.classList.remove('hidden'); // Show submit for "No"
+      } else {
+        conditionalFields.classList.add('hidden');
+        submitBtn.classList.add('hidden');
       }
     });
 
-    // Add dynamic guest fields
+    // Add guest detail fields based on number
     guestCountInput.addEventListener('input', () => {
       const count = parseInt(guestCountInput.value) || 0;
       guestDetailsContainer.innerHTML = '';
@@ -164,7 +182,7 @@
       }
     });
 
-    // Confirmation message after submission
+    // Confirmation message on form submission
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -175,8 +193,9 @@
       }).then(response => {
         const attending = formData.get("Attending");
         form.reset();
-        guestCountWrapper.style.display = 'none';
+        conditionalFields.classList.add('hidden');
         guestDetailsContainer.innerHTML = '';
+        submitBtn.classList.add('hidden');
 
         if (attending === "Yes") {
           confirmation.textContent = "Thanks for your RSVP! Can't wait to celebrate with you in Virginia!";
