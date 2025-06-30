@@ -138,19 +138,26 @@
         // Show/hide fields based on attending selection
         attendingSelect.addEventListener('change', () => {
           const attending = attendingSelect.value;
-    
+
           if (attending === "Yes") {
             conditionalFields.classList.remove('hidden');
             submitBtn.classList.remove('hidden');
+          
+            // Re-add required attributes
+            document.getElementById('phone').required = true;
           } else if (attending === "No") {
             conditionalFields.classList.add('hidden');
             guestDetailsContainer.innerHTML = '';
             guestCountInput.value = '';
-            submitBtn.classList.remove('hidden'); // Show submit for "No"
+            submitBtn.classList.remove('hidden');
+          
+            // Remove required attributes
+            document.getElementById('phone').required = false;
           } else {
             conditionalFields.classList.add('hidden');
             submitBtn.classList.add('hidden');
           }
+          
         });
     
         // Generate guest detail fields
