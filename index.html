@@ -126,6 +126,21 @@
   </form>
 
     <script>
+      
+      // Meal Preview Helper Function
+        function updateMealPreview(selectElement, previewId) {
+        const descriptions = {
+          Chicken: "Grilled chicken with mashed potatoes and asparagus.",
+          Fish: "Pan-seared salmon with wild rice and broccoli.",
+          Vegetarian: "Stuffed bell peppers with quinoa and seasonal vegetables."
+          Kids: "Chicken tenders with fries and a fruit cup."
+        };
+      
+        const previewDiv = document.getElementById(previewId);
+        const selectedMeal = selectElement.value;
+        previewDiv.textContent = descriptions[selectedMeal] || "";
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById('rsvpForm');
         const guestCountInput = document.getElementById('guestCount');
@@ -159,12 +174,14 @@
           }
           
         });
-    
+
+
+        
         // Generate guest detail fields
         guestCountInput.addEventListener('input', () => {
           const count = parseInt(guestCountInput.value) || 0;
           guestDetailsContainer.innerHTML = '';
-    
+        
           for (let i = 1; i <= count; i++) {
             const section = document.createElement('div');
             section.className = 'guest-section';
@@ -172,19 +189,21 @@
               <h4>Guest ${i}</h4>
               <label for="guest${i}Name">Full Name</label>
               <input type="text" name="Guest ${i} Name" id="guest${i}Name" required>
-    
+        
               <label for="guest${i}Meal">Meal Choice</label>
-              <select name="Guest ${i} Meal" id="guest${i}Meal" required>
+              <select name="Guest ${i} Meal" id="guest${i}Meal" required onchange="updateMealPreview(this, 'preview${i}')">
                 <option value="">Select Meal</option>
                 <option value="Chicken">Chicken</option>
                 <option value="Fish">Fish</option>
                 <option value="Vegetarian">Vegetarian</option>
+                <option value="Kids">Kids Meal</option>
               </select>
+              <div id="preview${i}" style="font-style: italic; margin-top: 5px;"></div>
             `;
             guestDetailsContainer.appendChild(section);
           }
         });
-    
+   
         // Handle form submission
         form.addEventListener('submit', function (e) {
           e.preventDefault();
